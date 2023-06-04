@@ -4,7 +4,8 @@ from telebot.types import Message
 from geopy.distance import geodesic
 from .keyboards import shelter_options
 import math
-from database import Shelter
+from database import Shelter, User, Votes
+import peewee
 
 # shelters = load_shelters()
 
@@ -14,6 +15,15 @@ def start_handler(message: Message):
         message.chat.id,
         "Привіт. Я бот який допоможе знайти найближче укриття. Для початку пошуку скинь мені точку на карті"
     )
+    try:
+        User.create(
+            uid=message.from_user.id,
+            username=message.from_user.username,
+            firstname=message.from_user.first_name,
+            lastname=message.from_user.last_name
+        )
+    except peewee.IntegrityError:
+        pass
 
 
 @bot.message_handler(content_types=['location'])
@@ -40,10 +50,16 @@ def location_handler(message: Message):
         )
     # print(shelters)
     for shelter in shelter_list[:5]:
+        positive_votes = Votes.select().where(Votes.is_positive == True).where(Votes.shelter == shelter).count()
+        negative_votes = Votes.select().where(Votes.is_positive == False).where(Votes.shelter == shelter).count()
+
         bot.send_message(
             message.chat.id,
-            f"{shelter.street}\nДистанція: {shelter.dist} метрів",
-            reply_markup=shelter_options(f"http://maps.google.com/maps?q={shelter.lat},{shelter.lon} ")
+            f"[{shelter.type}]\n{shelter.street}\nОпис та орієнтир:\n{shelter.description if shelter.description else 'Нема даних'}\nДистанція: {shelter.dist} метрів\nРейтинг:\n👍: {positive_votes}\n👎: {negative_votes}",
+            reply_markup=shelter_options(
+            f"http://maps.google.com/maps?q={shelter.lat},{shelter.lon} ",
+            shelter_id=shelter.id
+            )
         )
 
     

@@ -18,6 +18,7 @@ def load_shelters():
     shelters = [] 
     for i in places:
         info = {}
+        print(i.to_string())
         match = re.search(r"<kml:coordinates>[0-9\.,]+<\/kml:coordinates>", i.to_string())
         if match:
             data = match.group().removeprefix('<kml:coordinates>').removesuffix('</kml:coordinates>').split(',')[:2]
@@ -40,6 +41,6 @@ if __name__ == "__main__":
             city="Kyiv"
         )
 
-    print(list(Shelter.select()))
+    # print(list(Shelter.select()))
 
     
