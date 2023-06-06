@@ -3,8 +3,8 @@ from . import db
 
 
 class Shelter(Model):
-    city = CharField()
-    street = CharField()
+    city = CharField(null=True)
+    street = CharField(null=True)
     lat = FloatField()
     lon = FloatField()
     type = CharField(default='official')

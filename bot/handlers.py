@@ -1,19 +1,19 @@
 from . import bot
 from telebot.types import Message
-# from kml_reader import load_shelters
 from geopy.distance import geodesic
-from .keyboards import shelter_options
+from .keyboards import shelter_options, main_keyboard
 import math
 from database import Shelter, User, Votes
 import peewee
 
-# shelters = load_shelters()
+
 
 @bot.message_handler(commands=['start'])
 def start_handler(message: Message):
     bot.send_message(
         message.chat.id,
-        "Привіт. Я бот який допоможе знайти найближче укриття. Для початку пошуку скинь мені точку на карті"
+        "Привіт. Я бот який допоможе знайти найближче укриття. Для початку пошуку скинь мені точку на карті",
+        reply_markup=main_keyboard()
     )
     try:
         User.create(
@@ -55,7 +55,7 @@ def location_handler(message: Message):
 
         bot.send_message(
             message.chat.id,
-            f"[{shelter.type}]\n{shelter.street}\nОпис та орієнтир:\n{shelter.description if shelter.description else 'Нема даних'}\nДистанція: {shelter.dist} метрів\nРейтинг:\n👍: {positive_votes}\n👎: {negative_votes}",
+            f"[{shelter.type}]\nВулиця: {shelter.street if shelter.street else 'Не вказано'}\nОпис та орієнтир:\n{shelter.description if shelter.description else 'Нема даних'}\nДистанція: {shelter.dist} метрів\nРейтинг:\n👍: {positive_votes}\n👎: {negative_votes}",
             reply_markup=shelter_options(
             f"http://maps.google.com/maps?q={shelter.lat},{shelter.lon} ",
             shelter_id=shelter.id
